@@ -26,6 +26,7 @@ import datetime as _datetime
 import requests as _requests
 import pandas as _pd
 import numpy as _np
+import lxml.html as _lh
 
 try:
     from urllib.parse import quote as urlencode
@@ -405,6 +406,23 @@ class TickerBase():
             self._earnings['quarterly'] = df
 
         self._fundamentals = True
+
+    def get_growth(self, proxy=None):
+        # Get analysis page from Yahoo
+        url = '%s/%s/analysis' % (self._base_url, self.ticker)
+        page = _requests.get(url=url, proxies=proxy)
+
+        # Get all table rows from document, they will be ordered
+        doc = _lh.fromstring(page.content)
+        trs = doc.xpath('//tr')
+
+        # Data is stored in table with 2 columns, first is name and second is value
+        for i, tr in enumerate(trs):
+            tds = tr.getchildren()
+            if tds[0].text_content() == "Next 5 Years (per annum)":
+                return float(tds[1].text_content().replace('%', '')) / 100
+
+        return 0.0
 
     def get_recommendations(self, proxy=None, as_dict=False, *args, **kwargs):
         self._get_fundamentals(proxy)
