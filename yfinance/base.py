@@ -409,7 +409,7 @@ class TickerBase():
 
     def get_growth(self, proxy=None):
         # Get analysis page from Yahoo
-        url = '%s/%s/analysis' % (self._base_url, self.ticker)
+        url = '%s/%s/analysis' % (self._scrape_url, self.ticker)
         page = _requests.get(url=url, proxies=proxy)
 
         # Get all table rows from document, they will be ordered
